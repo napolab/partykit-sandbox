@@ -85,8 +85,10 @@ export default class Server implements Party.Server {
 				case "increment": {
 					let reaction = this.reactions.get(msg.name);
 					if (reaction === undefined) {
-						reaction = { name: msg.name, count: 1 };
-						this.reactions.set(msg.name, reaction);
+						if (this.reactions.size < 10) {
+							reaction = { name: msg.name, count: 1 };
+							this.reactions.set(msg.name, reaction);
+						}
 					} else {
 						reaction.count = Math.min(reaction.count + 1, 99);
 						this.reactions.set(msg.name, reaction);
@@ -103,8 +105,10 @@ export default class Server implements Party.Server {
 				case "decrement": {
 					let reaction = this.reactions.get(msg.name);
 					if (reaction === undefined) {
-						reaction = { name: msg.name, count: 0 };
-						this.reactions.set(msg.name, reaction);
+						if (this.reactions.size < 10) {
+							reaction = { name: msg.name, count: 0 };
+							this.reactions.set(msg.name, reaction);
+						}
 					} else {
 						reaction.count = Math.max(0, reaction.count - 1);
 						this.reactions.set(msg.name, reaction);

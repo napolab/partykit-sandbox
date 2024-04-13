@@ -1,0 +1,19 @@
+{
+  "name": "partykit-sandbox",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "partykit dev --live",
+    "deploy": "partykit deploy",
+    "fmt": "biome check --apply src",
+    "lint": "biome check src"
+  },
+  "dependencies": {
+    "partysocket": "^1.0.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.6.4",
+    "partykit": "^0.0.100",
+    "typescript": "^5.4.2"
+  }
+}

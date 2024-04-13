@@ -31,7 +31,7 @@ export const MessageType = union([
 export type MessageType = Output<typeof MessageType>;
 
 export default class Server implements Party.Server {
-	readonly options: Party.ServerOptions = { hibernate: true };
+	// readonly options: Party.ServerOptions = { hibernate: true };
 	private reactions = new Map<Reaction["name"], Reaction>();
 
 	constructor(readonly room: Party.Room) {

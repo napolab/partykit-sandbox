@@ -56,7 +56,7 @@ export default class Server implements Party.Server {
 	async onStart() {
 		await this.room.blockConcurrencyWhile(async () => {
 			const reactions = await this.room.storage.get<Map<Reaction["name"], Reaction>>("reactions");
-			console.log("start", reactions);
+			console.log("start", this.room.id, reactions);
 			const emojis = [get("+1"), get("balloon"), get("heart")].filter((v): v is string => v !== undefined && v !== "");
 
 			this.reactions = reactions ?? new Map(emojis.map((emoji) => [emoji, { name: emoji, count: 0 }]));

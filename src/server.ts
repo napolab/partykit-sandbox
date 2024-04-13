@@ -55,6 +55,7 @@ export default class Server implements Party.Server {
 
 	async onStart() {
 		const reactions = await this.room.storage.get<Map<Reaction["name"], Reaction>>("reactions");
+		console.log("start", reactions);
 		const emojis = [get("+1"), get("balloon"), get("heart")].filter((v): v is string => v !== undefined && v !== "");
 
 		this.reactions = reactions ?? new Map(emojis.map((emoji) => [emoji, { name: emoji, count: 0 }]));

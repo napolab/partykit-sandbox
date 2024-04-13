@@ -1,4 +1,4 @@
-## 🎈 app
+# 🎈 PartyKit Sandbox
 
 Welcome to the party, pal!
 

@@ -1,31 +1,51 @@
-/* 
-  We've already included normalize.css. 
-
-  But we'd like a modern looking boilerplate. 
-  Clean type, sans-serif, and a nice color palette. 
-  
-*/
-
-body {
-  font-family: sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #333;
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100svh;
+  width: 100svw;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: sans-serif;
-  font-weight: 600;
-  line-height: 1.25;
-  margin-top: 0;
-  margin-bottom: 0.5rem;
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-#app {
-  padding: 1rem;
+.form__control {
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+}
+
+.form__submit {
+  display: flex;
+  justify-content: center;
+}
+
+h2 {
+  text-align: center;
+}
+
+.reaction-list {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  gap: 8px;
+}
+
+.reaction-list__item {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.increment, .decrement {
+  border: none;
+  background-color: transparent;
+  padding: 4px 8px;
+  cursor: pointer;
 }

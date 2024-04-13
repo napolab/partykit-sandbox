@@ -9,10 +9,17 @@
     "lint": "biome check src"
   },
   "dependencies": {
-    "partysocket": "^1.0.1"
+    "hono": "^4.2.4",
+    "node-emoji": "^2.1.3",
+    "partysocket": "^1.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "valibot": "^0.30.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.6.4",
+    "@types/react": "^18.2.78",
+    "@types/react-dom": "^18.2.25",
     "partykit": "^0.0.100",
     "typescript": "^5.4.2"
   }

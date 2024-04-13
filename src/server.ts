@@ -96,7 +96,7 @@ export default class Server implements Party.Server {
 						reaction.count = Math.min(reaction.count + 1, 99);
 						this.reactions.set(msg.name, reaction);
 					}
-					this.room.storage.put("state:reactions", this.reactions);
+					await this.room.storage.put("state:reactions", this.reactions);
 
 					const notify: MessageType = {
 						type: "update:reaction",
@@ -116,7 +116,7 @@ export default class Server implements Party.Server {
 						reaction.count = Math.max(0, reaction.count - 1);
 						this.reactions.set(msg.name, reaction);
 					}
-					this.room.storage.put("state:reactions", this.reactions);
+					await this.room.storage.put("state:reactions", this.reactions);
 
 					const notify: MessageType = {
 						type: "update:reaction",

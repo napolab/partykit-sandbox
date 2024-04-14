@@ -31,8 +31,11 @@ export const MessageType = union([
 export type MessageType = Output<typeof MessageType>;
 
 export default class Server implements Party.Server {
-	// readonly options: Party.ServerOptions = { hibernate: true };
+	readonly options: Party.ServerOptions = { hibernate: true };
 	private reactions = new Map<Reaction["name"], Reaction>();
+	private KEY = {
+		REACTION: "state:reactions",
+	};
 
 	constructor(readonly room: Party.Room) {
 		//
@@ -52,29 +55,50 @@ export default class Server implements Party.Server {
 		req.headers.set("x-before-connect", `${Date.now()}`);
 		return req;
 	}
+	private async initializeReactions() {
+		const reactions = await this.room.storage.get<Map<Reaction["name"], Reaction>>(this.KEY.REACTION);
+		console.log("start", this.room.id, reactions);
+		const emojis = [get("+1"), get("balloon"), get("heart")].filter((v): v is string => v !== undefined && v !== "");
+
+		this.reactions = reactions ?? new Map(emojis.map((emoji) => [emoji, { name: emoji, count: 0 }]));
+		if (!reactions) {
+			await this.room.storage.put(this.KEY.REACTION, this.reactions);
+		}
+	}
+
+	private getReactions() {
+		return Array.from(this.reactions.values());
+	}
+	private getReaction(name: string) {
+		return this.reactions.get(name);
+	}
+	private async setReaction(reaction: Reaction) {
+		if (!has(reaction.name)) throw new Error("Invalid reaction name");
+
+		this.reactions.set(reaction.name, reaction);
+		await this.room.storage.put(this.KEY.REACTION, this.reactions);
+	}
+	private notifyUpdateReactions() {
+		const notify: MessageType = {
+			type: "update:reaction",
+			reactions: Array.from(this.reactions.values()),
+		};
+		this.room.broadcast(JSON.stringify(notify));
+	}
 
 	async onStart() {
 		await this.room.blockConcurrencyWhile(async () => {
-			const reactions = await this.room.storage.get<Map<Reaction["name"], Reaction>>("reactions");
-			console.log("start", this.room.id, reactions);
-			const emojis = [get("+1"), get("balloon"), get("heart")].filter((v): v is string => v !== undefined && v !== "");
-
-			this.reactions = reactions ?? new Map(emojis.map((emoji) => [emoji, { name: emoji, count: 0 }]));
-			if (reactions === undefined) {
-				await this.room.storage.put("state:reactions", this.reactions);
-			}
+			await this.initializeReactions();
 		});
 	}
 
 	async onRequest() {
-		return Response.json({ reactions: Array.from(this.reactions.values()) });
+		return Response.json({ reactions: this.getReactions() });
 	}
 
 	async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
-		const msg: MessageType = {
-			type: "connect",
-			payload: { reactions: Array.from(this.reactions.values()) },
-		};
+		const reactions = this.getReactions();
+		const msg: MessageType = { type: "connect", payload: { reactions } };
 		conn.send(JSON.stringify(msg));
 	}
 
@@ -86,43 +110,19 @@ export default class Server implements Party.Server {
 				case "connect":
 					break;
 				case "increment": {
-					let reaction = this.reactions.get(msg.name);
-					if (reaction === undefined) {
-						if (this.reactions.size < 10) {
-							reaction = { name: msg.name, count: 1 };
-							this.reactions.set(msg.name, reaction);
-						}
-					} else {
-						reaction.count = Math.min(reaction.count + 1, 99);
-						this.reactions.set(msg.name, reaction);
-					}
-					await this.room.storage.put("state:reactions", this.reactions);
+					const reaction = this.getReaction(msg.name);
+					if (!reaction) break;
 
-					const notify: MessageType = {
-						type: "update:reaction",
-						reactions: Array.from(this.reactions.values()),
-					};
-					this.room.broadcast(JSON.stringify(notify));
+					await this.setReaction({ ...reaction, count: Math.min(reaction.count + 1, 99) });
+					await this.notifyUpdateReactions();
 					break;
 				}
 				case "decrement": {
-					let reaction = this.reactions.get(msg.name);
-					if (reaction === undefined) {
-						if (this.reactions.size < 10) {
-							reaction = { name: msg.name, count: 0 };
-							this.reactions.set(msg.name, reaction);
-						}
-					} else {
-						reaction.count = Math.max(0, reaction.count - 1);
-						this.reactions.set(msg.name, reaction);
-					}
-					await this.room.storage.put("state:reactions", this.reactions);
+					const reaction = this.getReaction(msg.name);
+					if (!reaction) break;
 
-					const notify: MessageType = {
-						type: "update:reaction",
-						reactions: Array.from(this.reactions.values()),
-					};
-					this.room.broadcast(JSON.stringify(notify));
+					await this.setReaction({ ...reaction, count: Math.max(0, reaction.count - 1) });
+					await this.notifyUpdateReactions();
 					break;
 				}
 			}

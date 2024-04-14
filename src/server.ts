@@ -87,9 +87,7 @@ export default class Server implements Party.Server {
 	}
 
 	async onStart() {
-		await this.room.blockConcurrencyWhile(async () => {
-			await this.initializeReactions();
-		});
+		await this.initializeReactions();
 	}
 
 	async onRequest() {

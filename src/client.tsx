@@ -13,7 +13,7 @@ const Root: FC<RoomProps> = ({ id }) => {
 	const [reactions, setReactions] = useState<Reaction[]>([]);
 	const socket = usePartySocket({
 		room: id,
-		onMessage(message) {
+		async onMessage(message) {
 			if (typeof message.data !== "string") return;
 
 			try {
@@ -22,8 +22,11 @@ const Root: FC<RoomProps> = ({ id }) => {
 					case "connect":
 						setReactions(msg.payload.reactions);
 						break;
-					case "update:reaction":
+					case "reaction:update":
 						setReactions(msg.reactions);
+						break;
+					case "ping":
+						await socket.send(JSON.stringify({ type: "pong" } satisfies MessageType));
 						break;
 					default:
 						console.log("Unknown message type", msg);
@@ -37,15 +40,13 @@ const Root: FC<RoomProps> = ({ id }) => {
 
 	const decrement = useCallback(
 		(name: string) => {
-			const msg: MessageType = { type: "decrement", name: name };
-			socket.send(JSON.stringify(msg));
+			socket.send(JSON.stringify({ type: "reaction:decrement", name: name } satisfies MessageType));
 		},
 		[socket],
 	);
 	const increment = useCallback(
 		(name: string) => {
-			const msg: MessageType = { type: "increment", name: name };
-			socket.send(JSON.stringify(msg));
+			socket.send(JSON.stringify({ type: "reaction:increment", name: name } satisfies MessageType));
 		},
 		[socket],
 	);
